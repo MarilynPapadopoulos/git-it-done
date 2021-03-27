@@ -26,31 +26,59 @@ var getUserRepos = function(user){
 
     //make a request to the url
     fetch(apiUrl).then(function(response){
-        response.json().then(function(data){
-            displayRepos(data, user);    
-        });
+        //request was successful
+        if(response.ok) {
+            
+            response.json().then(function(data){
+          
+            displayRepos(data, user); 
+            });
+        }  
+        else {
+            alert("Error: " + response.statusText);
+        } 
+    })
+    .catch(function(error){
+        alert("Unable to connect to GitHub");
     });
 };
 
 var displayRepos = function(repos, searchTerm) {
-    console.log(repos);
+    if (repos.length === 0) {
+        repoContainterEl.textContent = "No repositories found.";
+        return;
+    }
+    console.log("repos", repos);
     console.log(searchTerm);
     //clear old content
     repoContainerEl.textContent = "";
     repoSearchTerm.textContent = searchTerm;
+    console.log(typeof repos);
 
     //loop over repos
-    for (var i =0; i< repos.length; i++); {
+    for (var i = 0; i < repos.length; i++) {
         //format repo name
         var repoName = repos[i].owner.login + "/" + repos[i].name;
         //create a container for each repo
         var repoEl = document.createElement("div");
-        repoEl.classList = "list-itme flex-row justify-space-between align-center";
+        repoEl.classList = "list-item flex-row justify-space-between align-center";
         //create a span element to hold repository name
-        var titleEl = docuement.createElement("span");
+        var titleEl = document.createElement("span");
         titleEl.textContnent = repoName;
-        //append to container
-        repoEl.appendChild(titleEl);
+       
+        //create a status element
+        var statusEl = document.createElement("span");
+        statusEl.classList = "flex-row align-center";
+
+        //check if current repo has issues or not
+        if (repos[i].open_issue_count > 0) {
+            statusEl.innerHTML = "<i class ='fas fa-times status-icon icaon-danger'></i>" + repos[i].open_issues-count + " issue(s)";
+        }
+        else {
+            statusEl.innerHTML = "<i class='fas fa-check-square status-icon icon-success;></i>";
+        }
+         //append to container
+         repoEl.appendChild(titleEl);
         //append container to the dom
         repoContainerEl.appendChild(repoEl);
     }
